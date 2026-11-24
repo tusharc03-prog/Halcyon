@@ -1,0 +1,19 @@
+Halcyon_India_Technosys_ERP/
+¦
++-- app.py
++-- database.py
++-- requirements.txt
++-- build_exe.bat
++-- .gitignore
+¦
++-- ui/
+¦   +-- index.html
+¦   +-- style.css
+¦   +-- app.js
+¦
++-- tests/
+¦   +-- test_database.py
+¦
++-- backups/
+¦
++-- README.md

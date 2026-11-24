@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Halcyon India Technosys ERP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand-mark">H</div>
+    <div class="brand">
+      <strong>HALCYON</strong>
+      <span>INDIA TECHNOSYS</span>
+    </div>
+    <div class="side-label">WORKSPACE</div>
+    <button class="nav active" data-page="dashboard">◈ <span>Command Centre</span></button>
+    <button class="nav" data-page="company">▦ <span>Company Master</span></button>
+    <button class="nav" data-page="products">▣ <span>Product Master</span></button>
+    <button class="nav" data-page="movement">⇅ <span>Stock In / Out</span></button>
+    <button class="nav" data-page="reports">▤ <span>Stock Report</span></button>
+    <div class="sidebar-bottom">
+      <span class="online-dot"></span> Local database connected
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">INVENTORY OPERATIONS</div>
+        <h1 id="page-title">Command Centre</h1>
+      </div>
+      <div class="top-right"><span class="local-pill">● LOCAL DESKTOP</span><span id="today"></span></div>
+    </header>
+
+    <section id="dashboard" class="page active">
+      <div class="welcome">
+        <div><span class="eyebrow light">OPERATIONS OVERVIEW</span>
+          <h2>Inventory at a glance</h2>
+          <p>Monitor products, stock movement and reorder requirements.</p>
+        </div>
+        <div class="welcome-orbit">HIT</div>
+      </div>
+      <div class="stats">
+        <article class="stat"><span>Total Products</span><strong id="stat-products">0</strong><small>Active product records</small></article>
+        <article class="stat"><span>Available Stock</span><strong id="stat-units">0</strong><small>Total units in inventory</small></article>
+        <article class="stat"><span>Stock Value</span><strong id="stat-value">₹0.00</strong><small>Based on purchase price</small></article>
+        <article class="stat warning"><span>Low Stock Items</span><strong id="stat-low">0</strong><small>At or below reorder level</small></article>
+      </div>
+      <div class="panel">
+        <div class="panel-heading"><div><h3>Low stock alerts</h3><p>Products requiring attention</p></div><button class="secondary" onclick="showPage('reports')">View stock report →</button></div>
+        <div id="low-stock-list" class="empty">No low-stock products to display.</div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading"><div><h3>Recent stock movements</h3><p>Latest inventory transactions</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Quantity</th><th>Note</th></tr></thead><tbody id="recent-movements"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="company" class="page">
+      <div class="panel form-panel">
+        <div class="panel-heading"><div><h3>Company Master</h3><p>Maintain your organisation details</p></div></div>
+        <form id="company-form" class="form-grid">
+          <label class="wide">Company Name<input id="company-name" required></label>
+          <label class="wide">Address<textarea id="company-address" rows="3"></textarea></label>
+          <label>GSTIN<input id="company-gstin" placeholder="GST registration number"></label>
+          <label>MSME / Udyam Number<input id="company-msme"></label>
+          <div class="wide"><button class="primary" type="submit">Save Company Details</button><span id="company-message" class="message"></span></div>
+        </form>
+      </div>
+    </section>
+
+    <section id="products" class="page">
+      <div class="panel form-panel">
+        <div class="panel-heading"><div><h3>Add New Product</h3><p>Create a product before recording stock movements</p></div></div>
+        <form id="product-form" class="form-grid">
+          <label>Product Code / SKU<input id="sku" required placeholder="e.g. IPC-001"></label>
+          <label>Product Name<input id="product-name" required placeholder="e.g. IP Camera"></label>
+          <label>Category<input id="category" placeholder="CCTV / Networking"></label>
+          <label>Unit<select id="unit"><option>Nos</option><option>Box</option><option>Roll</option><option>Meter</option><option>Set</option><option>Piece</option></select></label>
+          <label>Purchase Price (₹)<input id="price" type="number" min="0" step="0.01" value="0"></label>
+          <label>Reorder Level<input id="reorder" type="number" min="0" step="0.01" value="0"></label>
+          <div class="wide"><button class="primary" type="submit">＋ Add Product</button><span id="product-message" class="message"></span></div>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="panel-heading"><div><h3>Product List</h3><p>Products registered in the local database</p></div><button class="secondary" onclick="refreshAll()">↻ Refresh</button></div>
+        <div class="table-wrap"><table><thead><tr><th>SKU</th><th>Product</th><th>Category</th><th>Unit</th><th>Purchase Price</th><th>Balance</th><th>Reorder Level</th></tr></thead><tbody id="products-table"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="movement" class="page">
+      <div class="panel form-panel">
+        <div class="panel-heading"><div><h3>Stock In / Stock Out</h3><p>Record receipts and issues. Stock-out cannot exceed available balance.</p></div></div>
+        <form id="movement-form" class="form-grid">
+          <label class="wide">Select Product<select id="movement-product" required><option value="">Choose a product</option></select></label>
+          <label>Movement Type<select id="movement-type"><option value="IN">Stock In</option><option value="OUT">Stock Out</option></select></label>
+          <label>Quantity<input id="movement-qty" type="number" min="0.01" step="0.01" required></label>
+          <label class="wide">Reference / Notes<input id="movement-note" placeholder="Purchase receipt, project issue, adjustment reference"></label>
+          <div class="wide"><button class="primary" type="submit">Save Stock Movement</button><span id="movement-message" class="message"></span></div>
+        </form>
+      </div>
+    </section>
+
+    <section id="reports" class="page">
+      <div class="panel">
+        <div class="panel-heading"><div><h3>Current Stock Report</h3><p>Live balances calculated from stock movements</p></div><button class="secondary" onclick="refreshAll()">↻ Refresh report</button></div>
+        <div class="table-wrap"><table><thead><tr><th>SKU</th><th>Product</th><th>Category</th><th>Balance</th><th>Unit</th><th>Reorder Level</th><th>Status</th></tr></thead><tbody id="report-table"></tbody></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-heading"><div><h3>Movement History</h3><p>Most recent 100 transactions</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Date</th><th>SKU</th><th>Product</th><th>Type</th><th>Quantity</th><th>Note</th></tr></thead><tbody id="history-table"></tbody></table></div>
+      </div>
+    </section>
+    <footer>HALCYON INDIA TECHNOSYS <span>Inventory ERP · Local SQLite edition</span></footer>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+</body>
+</html>
